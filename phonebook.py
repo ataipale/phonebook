@@ -6,6 +6,9 @@ Requirements:
     brew install mongodb
 
     run the command 'sudo mongod' before running this program to initiate connection to mongodb
+
+    example:
+        $ python phonebook.py lookup sarah friend
 '''
 
 import sys
@@ -22,9 +25,9 @@ def lookup(name, phonebook_name):
     '''return the number of a person in the phonebook'''
     if phonebook_name in phonebook_db.collection_names():
         collection_pointer = getattr(phonebook_db, phonebook_name)
-        p = [i for i in collection_pointer.find({'name' : name})]
+        p = collection_pointer.find_one({'name' : name})
         if p:
-            print p.pop().get('phone')
+            print p['phone']
         else:
             "%s does not exist" %name
     else:
@@ -36,8 +39,7 @@ def add(name, number, phonebook_name):
     
     if phonebook_name in phonebook_db.collection_names():
         collection_pointer = getattr(phonebook_db, phonebook_name)
-        p = [i for i in collection_pointer.find({'name' : name})]
-        if p: 
+        if collection_pointer.find_one({'name' : name}): 
             print "Duplicate entry, %s not changed" %name
         else: 
             collection_pointer.insert({'name':name, 'phone':number})
@@ -69,17 +71,17 @@ def remove(name, phonebook_name):
 def reverse_lookup(number, phonebook_name):
 
     '''return person matching phone number'''
-    
+
     if phonebook_name in phonebook_db.collection_names():
         collection_pointer = getattr(phonebook_db, phonebook_name)
-        p = [i for i in collection_pointer.find({'phone' : number})]
-        if p: #need to pop to get dict from list
-            print p.pop().get('name')
+        p = collection_pointer.find_one({'phone' : number})
+        if p:
+            print p['name']
         else:
             "%s does not exist" %name
     else:
         print "%s does not exist" %phonebook_name
-
+    
 if __name__ == '__main__':
 
     client = pymongo.MongoClient() #pointer at server
